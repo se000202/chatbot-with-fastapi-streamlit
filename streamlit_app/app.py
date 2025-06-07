@@ -15,8 +15,6 @@ if "messages" not in st.session_state:
 if "loading" not in st.session_state:
     st.session_state.loading = False
 
-# 디버그용: messages 상태 출력
-
 # UI 구성
 st.title("🗨️ Chatbot with Context (FastAPI + GPT)")
 
@@ -35,6 +33,7 @@ user_input = st.text_input("Your message:", "")
 if st.button("Send"):
     if user_input.strip() != "":
         st.session_state.messages.append({"role": "user", "content": user_input})
+        st.session_state.user_input = ""
         st.session_state.loading = True  # loading 상태 ON
         st.rerun()  # 다시 실행 → loading 상태 처리
 
