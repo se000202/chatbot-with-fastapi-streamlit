@@ -35,7 +35,7 @@ if st.button("Send"):
     if user_input.strip() != "":
         # user message 추가
         st.session_state.messages.append({"role": "user", "content": user_input})
-         st.session_state["user_input"] = ""
+        st.session_state["user_input"] = ""
         # loading 상태 ON → spinner에서 처리
         st.session_state.loading = True
         st.rerun()
