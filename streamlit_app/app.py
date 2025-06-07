@@ -3,7 +3,7 @@ import requests
 import os
 
 # API URL 설정
-API_URL = os.getenv("FASTAPI_URL", "https://web-production-b2180.up.railway.app/chat")
+API_URL = os.getenv("FASTAPI_URL")
 
 # messages 초기화
 if "messages" not in st.session_state:
