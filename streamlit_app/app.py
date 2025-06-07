@@ -4,7 +4,9 @@ import os
 
 # API URL 설정
 API_URL = os.getenv("FASTAPI_URL")
-
+if not API_URL:
+    st.error("❌ API_URL is not set! Please check your environment variables.")
+    st.stop()
 # messages 초기화
 if "messages" not in st.session_state:
     st.session_state.messages = [
