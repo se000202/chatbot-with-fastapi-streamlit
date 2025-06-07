@@ -27,9 +27,6 @@ if st.button("Send"):
                 API_URL,
                 json={"messages": st.session_state.messages}
             )
-            st.write(f"Response status code: {response.status_code}")  # 응답 코드 출력
-            st.write(f"Response body: {response.text}")  # 응답 본문 출력
-
             if response.status_code == 200:
                 bot_reply = response.json()["response"]
                 st.session_state.messages.append({"role": "assistant", "content": bot_reply})
