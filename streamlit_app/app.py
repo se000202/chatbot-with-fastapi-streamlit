@@ -1,12 +1,18 @@
 import streamlit as st
 import requests
 import os
+from dotenv import load_dotenv
 
-# API URL 설정
+# .env 로드 (로컬 개발 시)
+load_dotenv()
+
+# API URL 설정 (fallback 포함)
 API_URL = os.getenv("FASTAPI_URL")
+
 if not API_URL:
     st.error("❌ API_URL is not set! Please check your environment variables.")
     st.stop()
+
 # messages 초기화
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -47,8 +53,8 @@ if st.button("Send"):
         })
 
         # 입력창 초기화 → key_num 증가 → key 재설정 ⭐️
-        #st.session_state.user_input_key_num += 1
-        #st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
+        st.session_state.user_input_key_num += 1
+        st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
         st.session_state.loading = True
         st.rerun()
@@ -63,12 +69,16 @@ if st.session_state.loading:
             )
 
             if response.status_code == 200:
-                bot_reply = response.json()["response"]
-                st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+                try:
+                    bot_reply = response.json()["response"]
+                    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+                except Exception as e:
+                    st.error(f"❌ Error parsing JSON: {str(e)}\nResponse text: {response.text}")
             else:
-                st.error(f"Error {response.status_code}: {response.text}")
+                st.error(f"❌ Error {response.status_code}: {response.text}")
+
         except Exception as e:
-            st.error(f"Exception: {str(e)}")
+            st.error(f"❌ Exception during request: {str(e)}")
 
         st.session_state.loading = False
         st.rerun()
