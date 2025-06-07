@@ -30,6 +30,7 @@ if st.button("Send"):
             if response.status_code == 200:
                 bot_reply = response.json()["response"]
                 st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+                st.rerun()
             else:
                 st.error(f"Error {response.status_code}: {response.text}")
 
