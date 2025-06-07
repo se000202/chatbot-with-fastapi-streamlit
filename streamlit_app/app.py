@@ -8,7 +8,7 @@ load_dotenv()
 
 # API URL 설정 (fallback 포함)
 API_URL = os.getenv("FASTAPI_URL", "https://web-production-b2180.up.railway.app/chat")
-
+st.write(f"API_URL = {API_URL}")
 if not API_URL:
     st.error("❌ API_URL is not set! Please check your environment variables.")
     st.stop()
