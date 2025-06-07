@@ -2,10 +2,10 @@ import streamlit as st
 import requests
 import os
 
-# API URL 설정 (FASTAPI_URL 환경변수 or 기본값 사용)
+# API URL 설정
 API_URL = os.getenv("FASTAPI_URL", "https://web-production-b2180.up.railway.app/chat")
 
-# messages 초기화 → 반드시 먼저 해야 함!
+# messages 초기화
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "system", "content": "You are a helpful assistant."}
@@ -15,6 +15,9 @@ if "messages" not in st.session_state:
 if "loading" not in st.session_state:
     st.session_state.loading = False
 
+# user_input_key 초기화 (key 변경 트릭 ⭐️)
+if "user_input_key" not in st.session_state:
+    st.session_state.user_input_key = "user_input_0"
 
 # UI 구성
 st.title("🗨️ Chatbot with Context (FastAPI + GPT)")
@@ -27,16 +30,22 @@ for msg in st.session_state.messages:
         elif msg["role"] == "assistant":
             st.write(f"🤖 **Bot:** {msg['content']}")
 
-# 사용자 입력 (⭐️ 깔끔한 방식 → value="" 사용 → session_state 충돌 방지)
-user_input = st.text_input("Your message:", value="")
+# 사용자 입력 (key 변경 트릭 적용 ⭐️)
+user_input = st.text_input("Your message:", key=st.session_state.user_input_key)
 
 # Send 버튼
 if st.button("Send"):
-    if user_input.strip() != "":
+    if st.session_state[st.session_state.user_input_key].strip() != "":
         # user message 추가
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        st.session_state["user_input"] = ""
-        # loading 상태 ON → spinner에서 처리
+        st.session_state.messages.append({
+            "role": "user",
+            "content": st.session_state[st.session_state.user_input_key]
+        })
+
+        # 입력창 초기화 → key 변경 ⭐️⭐️⭐️
+        current_num = int(st.session_state.user_input_key.split("_")[1])
+        st.session_state.user_input_key = f"user_input_{current_num + 1}"
+
         st.session_state.loading = True
         st.rerun()
 
@@ -57,8 +66,8 @@ if st.session_state.loading:
         except Exception as e:
             st.error(f"Exception: {str(e)}")
 
-        st.session_state.loading = False  # loading 상태 OFF
-        st.rerun()  # rerun → 새 메시지 표시
+        st.session_state.loading = False
+        st.rerun()
 
 # Clear Chat 버튼
 if st.button("Clear Chat"):
@@ -66,4 +75,9 @@ if st.button("Clear Chat"):
         {"role": "system", "content": "You are a helpful assistant."}
     ]
     st.session_state.loading = False
+
+    # 입력창 초기화 → key 변경 ⭐️⭐️⭐️
+    current_num = int(st.session_state.user_input_key.split("_")[1])
+    st.session_state.user_input_key = f"user_input_{current_num + 1}
+
     st.rerun()
