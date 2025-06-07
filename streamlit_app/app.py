@@ -15,9 +15,11 @@ if "messages" not in st.session_state:
 if "loading" not in st.session_state:
     st.session_state.loading = False
 
-# user_input_key 초기화 (key 변경 트릭 ⭐️)
+# user_input_key_num 및 user_input_key 초기화 (안전 패턴 ⭐️)
+if "user_input_key_num" not in st.session_state:
+    st.session_state.user_input_key_num = 0
 if "user_input_key" not in st.session_state:
-    st.session_state.user_input_key = "user_input_0"
+    st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
 # UI 구성
 st.title("🗨️ Chatbot with Context (FastAPI + GPT)")
@@ -42,9 +44,9 @@ if st.button("Send"):
             "content": st.session_state[st.session_state.user_input_key]
         })
 
-        # 입력창 초기화 → key 변경 ⭐️⭐️⭐️
-        current_num = int(st.session_state.user_input_key.split("_")[1])
-        st.session_state.user_input_key = f"user_input_{current_num + 1}"
+        # 입력창 초기화 → key_num 증가 → key 재설정 ⭐️
+        st.session_state.user_input_key_num += 1
+        st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
         st.session_state.loading = True
         st.rerun()
@@ -76,8 +78,8 @@ if st.button("Clear Chat"):
     ]
     st.session_state.loading = False
 
-    # 입력창 초기화 → key 변경 ⭐️⭐️⭐️
-    current_num = int(st.session_state.user_input_key.split("_")[1])
-    st.session_state.user_input_key = f"user_input_{current_num + 1}"
+    # 입력창 초기화 → key_num 증가 → key 재설정 ⭐️
+    st.session_state.user_input_key_num += 1
+    st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
     st.rerun()
