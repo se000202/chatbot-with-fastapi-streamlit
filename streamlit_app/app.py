@@ -43,9 +43,12 @@ for msg in st.session_state.messages:
 # 사용자 입력 (key 변경 트릭 적용 ⭐️)
 user_input = st.text_input("Your message:", key=st.session_state.user_input_key)
 
+# Debug 영역 → 현재 messages 구조 확인 ⭐️
+with st.expander("🔍 Debug: Current Messages"):
+    st.json(st.session_state.messages)
+
 # Send 버튼
 if st.button("Send"):
-    # ✅ 안전한 user_input 접근 (KeyError 방지)
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
     if user_input_value != "":
@@ -66,6 +69,12 @@ if st.button("Send"):
 if st.session_state.loading:
     with st.spinner("Assistant is typing..."):
         try:
+            # ✅ 빈 messages 전송 방지 → 최소한 1개 이상 있어야 요청 보냄
+            if len(st.session_state.messages) == 0:
+                st.error("❌ Cannot send empty messages list.")
+                st.session_state.loading = False
+                st.rerun()
+
             response = requests.post(
                 API_URL,
                 json={"messages": st.session_state.messages}
@@ -75,7 +84,6 @@ if st.session_state.loading:
                 try:
                     resp_json = response.json()
 
-                    # ✅ "response" 키 존재 확인 후 사용
                     if "response" in resp_json:
                         bot_reply = resp_json["response"]
                         st.session_state.messages.append({"role": "assistant", "content": bot_reply})
