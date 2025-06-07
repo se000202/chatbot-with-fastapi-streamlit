@@ -23,10 +23,6 @@ user_input = st.text_input("Your message:", "")
 if st.button("Send"):
     if user_input.strip() != "":
         st.session_state.messages.append({"role": "user", "content": user_input})
-
-        st.write("Sending POST request...")  # 디버그용 출력
-        st.write(st.session_state.messages)  # 현재 messages 확인
-
         try:
             response = requests.post(
                 API_URL,
