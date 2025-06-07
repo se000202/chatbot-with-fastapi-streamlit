@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
 import os
-st.write(f"Session messages count: {len(st.session_state.messages)}")
 API_URL = os.getenv("FASTAPI_URL", "https://web-production-b2180.up.railway.app/chat")
 st.write(f"API_URL = {API_URL}")  # 여기 추가 → URL 확인용
 
@@ -39,7 +38,6 @@ if st.button("Send"):
             if response.status_code == 200:
                 bot_reply = response.json()["response"]
                 st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-                st.experimental_rerun()
             else:
                 st.error(f"Error {response.status_code}: {response.text}")
 
