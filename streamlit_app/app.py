@@ -78,6 +78,6 @@ if st.button("Clear Chat"):
 
     # 입력창 초기화 → key 변경 ⭐️⭐️⭐️
     current_num = int(st.session_state.user_input_key.split("_")[1])
-    st.session_state.user_input_key = f"user_input_{current_num + 1}
+    st.session_state.user_input_key = f"user_input_{current_num + 1}"
 
     st.rerun()
