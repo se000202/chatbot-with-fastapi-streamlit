@@ -47,8 +47,8 @@ if st.button("Send"):
         })
 
         # 입력창 초기화 → key_num 증가 → key 재설정 ⭐️
-        st.session_state.user_input_key_num += 1
-        st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
+        #st.session_state.user_input_key_num += 1
+        #st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
         st.session_state.loading = True
         st.rerun()
