@@ -42,10 +42,6 @@ for msg in st.session_state.messages:
 # 사용자 입력 (key 변경 트릭 적용 ⭐️)
 user_input = st.text_input("Your message:", key=st.session_state.user_input_key)
 
-# Debug 영역 → 현재 messages 구조 확인 ⭐️
-with st.expander("🔍 Debug: Current Messages"):
-    st.json(st.session_state.messages)
-
 # Send 버튼
 if st.button("Send"):
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
