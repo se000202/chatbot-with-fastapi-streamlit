@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API URL 설정 (fallback 포함)
-API_URL = os.getenv("FASTAPI_URL")
+API_URL = os.getenv("FASTAPI_URL", "https://web-production-b2180.up.railway.app/chat")
 
 if not API_URL:
     st.error("❌ API_URL is not set! Please check your environment variables.")
@@ -45,11 +45,14 @@ user_input = st.text_input("Your message:", key=st.session_state.user_input_key)
 
 # Send 버튼
 if st.button("Send"):
-    if st.session_state[st.session_state.user_input_key].strip() != "":
+    # ✅ 안전한 user_input 접근 (KeyError 방지)
+    user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
+
+    if user_input_value != "":
         # user message 추가
         st.session_state.messages.append({
             "role": "user",
-            "content": st.session_state[st.session_state.user_input_key]
+            "content": user_input_value
         })
 
         # 입력창 초기화 → key_num 증가 → key 재설정 ⭐️
@@ -70,10 +73,18 @@ if st.session_state.loading:
 
             if response.status_code == 200:
                 try:
-                    bot_reply = response.json()["response"]
-                    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+                    resp_json = response.json()
+
+                    # ✅ "response" 키 존재 확인 후 사용
+                    if "response" in resp_json:
+                        bot_reply = resp_json["response"]
+                        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
+                    else:
+                        st.error(f"❌ Invalid response format: {resp_json}")
+
                 except Exception as e:
                     st.error(f"❌ Error parsing JSON: {str(e)}\nResponse text: {response.text}")
+
             else:
                 st.error(f"❌ Error {response.status_code}: {response.text}")
 
