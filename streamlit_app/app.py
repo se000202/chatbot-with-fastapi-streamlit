@@ -99,10 +99,10 @@ if st.button("Send (Streaming)"):
             bot_reply = ""
             reply_box = st.empty()
 
-        for line in response.iter_lines(decode_unicode=True):
-            if line:
-                bot_reply += line
-                reply_box.markdown(bot_reply)
+            for line in response.iter_lines(decode_unicode=True):
+                if line:
+                    bot_reply += line
+                    reply_box.markdown(bot_reply)
 
             st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
