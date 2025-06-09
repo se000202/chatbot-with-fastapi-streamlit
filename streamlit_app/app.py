@@ -1,4 +1,4 @@
-# ✅ app.py — Streamlit with Streaming + session_state 업데이트 개선
+# ✅ app.py — Streamlit with Streaming + 개선된 reply_box 동기화
 
 import streamlit as st
 import requests
@@ -30,12 +30,16 @@ if "user_input_key" not in st.session_state:
 st.title("🗨️ Chatbot with Streaming + Context (FastAPI + GPT)")
 
 # 이전 대화 표시
-for msg in st.session_state.messages:
+for i, msg in enumerate(st.session_state.messages):
     if msg["role"] != "system":
         if msg["role"] == "user":
             st.write(f"🧑‍💻 **You:** {msg['content']}")
         elif msg["role"] == "assistant":
-            st.markdown(msg['content'])  # ⭐️ LaTeX 수식 포함 표시 가능
+            if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
+                # streaming 중인 마지막 메시지라면 빈 자리만 출력
+                reply_box = st.empty()
+            else:
+                st.markdown(msg['content'])
 
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
@@ -75,26 +79,25 @@ if st.button("Send"):
 
         st.rerun()
 
-# ⭐️ Streaming Send 버튼 개선본
+# ⭐️ Streaming Send 버튼 개선: reply_box 동기화
 if st.button("Send (Streaming)"):
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
     if user_input_value != "":
-        # 사용자 메시지 추가
         st.session_state.messages.append({
             "role": "user",
             "content": user_input_value
         })
 
-        # 입력창 초기화
         st.session_state.user_input_key_num += 1
         st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
-        # ⭐️ 빈 assistant 메시지 먼저 추가 (실시간 업데이트 반영 목적)
+        # 빈 assistant 메시지 미리 추가하고 streaming flag 설정
         st.session_state.messages.append({
             "role": "assistant",
             "content": ""
         })
+        st.session_state.streaming = True
 
         # Streaming call
         with st.spinner("Assistant is streaming..."):
@@ -104,15 +107,15 @@ if st.button("Send (Streaming)"):
                 stream=True
             )
 
-            reply_box = st.empty()  # reply_box 항상 표시용
+            reply_box = st.empty()
 
             for line in response.iter_lines(decode_unicode=True):
                 if line:
-                    # session_state에 최신 업데이트 → 기존 채팅에도 바로 반영됨
                     st.session_state.messages[-1]["content"] += line
                     reply_box.markdown(st.session_state.messages[-1]["content"])
 
-        # rerun으로 최신 state 반영
+        # Streaming 끝남 → flag 제거하고 rerun
+        st.session_state.streaming = False
         st.rerun()
 
 # Clear Chat 버튼
