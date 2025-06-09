@@ -99,11 +99,10 @@ if st.button("Send (Streaming)"):
             bot_reply = ""
             reply_box = st.empty()
 
-            for chunk in response.iter_content(chunk_size=None):
-                if chunk:
-                    text_chunk = chunk.decode("utf-8")
-                    bot_reply += text_chunk
-                    reply_box.markdown(bot_reply)
+        for line in response.iter_lines(decode_unicode=True):
+            if line:
+                bot_reply += line
+                reply_box.markdown(bot_reply)
 
             st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
