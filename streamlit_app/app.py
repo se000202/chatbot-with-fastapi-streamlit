@@ -1,4 +1,4 @@
-# ✅ app.py — Streamlit with Streaming + 개선된 reply_box 완전 적용
+# ✅ app.py — Streamlit 최종 개선본 (Send / Send Streaming 완전 분리)
 
 import streamlit as st
 import requests
@@ -39,7 +39,6 @@ for i, msg in enumerate(st.session_state.messages):
             st.write(f"🧑‍💻 **You:** {msg['content']}")
         elif msg["role"] == "assistant":
             if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
-                # streaming 중인 마지막 메시지라면 reply_box 사용
                 reply_box.markdown(msg["content"])
             else:
                 st.markdown(msg['content'])
@@ -57,13 +56,12 @@ if st.button("Send"):
             "content": user_input_value
         })
 
-        # 입력창 초기화
         st.session_state.user_input_key_num += 1
         st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
         with st.spinner("Assistant is typing..."):
             response = requests.post(
-                API_URL,
+                API_URL,  # 일반 /chat 사용
                 json={"messages": st.session_state.messages}
             )
 
@@ -82,7 +80,7 @@ if st.button("Send"):
 
         st.rerun()
 
-# ⭐️ Streaming Send 버튼 개선: reply_box 동기화
+# Streaming Send 버튼
 if st.button("Send (Streaming)"):
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
@@ -95,28 +93,25 @@ if st.button("Send (Streaming)"):
         st.session_state.user_input_key_num += 1
         st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
-        # 빈 assistant 메시지 미리 추가하고 streaming flag 설정
         st.session_state.messages.append({
             "role": "assistant",
             "content": ""
         })
         st.session_state.streaming = True
 
-        # Streaming call
         with st.spinner("Assistant is streaming..."):
             response = requests.post(
-                API_URL,
+                API_URL + "?stream=true",  # ⭐️ stream query param 추가!
                 json={"messages": st.session_state.messages},
                 stream=True
             )
 
+            # ⭐️ iter_content 로 token-level stream
             for chunk in response.iter_content(chunk_size=1, decode_unicode=True):
                 if chunk:
                     st.session_state.messages[-1]["content"] += chunk
                     reply_box.markdown(st.session_state.messages[-1]["content"])
 
-
-        # Streaming 끝남 → flag 제거하고 rerun
         st.session_state.streaming = False
         st.rerun()
 
