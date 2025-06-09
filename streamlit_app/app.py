@@ -112,8 +112,8 @@ if st.button("Send (Streaming)"):
 
             for chunk in response.iter_content(chunk_size=1, decode_unicode=True):
                 if chunk:
-                st.session_state.messages[-1]["content"] += chunk
-                reply_box.markdown(st.session_state.messages[-1]["content"])
+                    st.session_state.messages[-1]["content"] += chunk
+                    reply_box.markdown(st.session_state.messages[-1]["content"])
 
 
         # Streaming 끝남 → flag 제거하고 rerun
