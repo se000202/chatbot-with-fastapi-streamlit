@@ -1,4 +1,4 @@
-# ✅ app.py — Streamlit with Streaming + 개선된 reply_box 동기화
+# ✅ app.py — Streamlit with Streaming + 개선된 reply_box 완전 적용
 
 import streamlit as st
 import requests
@@ -29,6 +29,9 @@ if "user_input_key" not in st.session_state:
 # UI 구성
 st.title("🗨️ Chatbot with Streaming + Context (FastAPI + GPT)")
 
+# reply_box 전역 선언
+reply_box = st.empty()
+
 # 이전 대화 표시
 for i, msg in enumerate(st.session_state.messages):
     if msg["role"] != "system":
@@ -36,8 +39,8 @@ for i, msg in enumerate(st.session_state.messages):
             st.write(f"🧑‍💻 **You:** {msg['content']}")
         elif msg["role"] == "assistant":
             if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
-                # streaming 중인 마지막 메시지라면 빈 자리만 출력
-                reply_box = st.empty()
+                # streaming 중인 마지막 메시지라면 reply_box 사용
+                reply_box.markdown(msg["content"])
             else:
                 st.markdown(msg['content'])
 
@@ -106,8 +109,6 @@ if st.button("Send (Streaming)"):
                 json={"messages": st.session_state.messages},
                 stream=True
             )
-
-            reply_box = st.empty()
 
             for line in response.iter_lines(decode_unicode=True):
                 if line:
