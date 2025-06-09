@@ -1,4 +1,4 @@
-# ✅ app.py — Streamlit 최종 개선본 (Send / Send Streaming 완전 분리)
+# ✅ app.py — Streamlit 최종본 (Send → /chat, Streaming → /chat_stream)
 
 import streamlit as st
 import requests
@@ -61,7 +61,7 @@ if st.button("Send"):
 
         with st.spinner("Assistant is typing..."):
             response = requests.post(
-                API_URL,  # 일반 /chat 사용
+                API_URL + "/chat",  # ✅ /chat endpoint 호출
                 json={"messages": st.session_state.messages}
             )
 
@@ -101,12 +101,12 @@ if st.button("Send (Streaming)"):
 
         with st.spinner("Assistant is streaming..."):
             response = requests.post(
-                API_URL + "?stream=true",  # ⭐️ stream query param 추가!
+                API_URL + "/chat_stream",  # ✅ /chat_stream endpoint 호출
                 json={"messages": st.session_state.messages},
                 stream=True
             )
 
-            # ⭐️ iter_content 로 token-level stream
+            # iter_content 로 token-level stream
             for chunk in response.iter_content(chunk_size=1, decode_unicode=True):
                 if chunk:
                     st.session_state.messages[-1]["content"] += chunk
