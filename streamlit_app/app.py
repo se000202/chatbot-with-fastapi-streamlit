@@ -40,7 +40,7 @@ for msg in st.session_state.messages:
             st.write(f"🤖 **Bot:** {msg['content']}")
 
 # 사용자 입력 (key 변경 트릭 적용 ⭐️)
-user_input = st.text_area("Your message:", key=st.session_state.user_input_key)
+user_input = st.text_area("Your message:", height = 100, key=st.session_state.user_input_key)
 
 # Send 버튼
 if st.button("Send"):
