@@ -1,4 +1,4 @@
-# ✅ app.py — Streamlit with Streaming + 기존 버튼 유지
+# ✅ app.py — Streamlit with Streaming + session_state 업데이트 개선
 
 import streamlit as st
 import requests
@@ -75,18 +75,26 @@ if st.button("Send"):
 
         st.rerun()
 
-# ⭐️ Streaming Send 버튼 추가
+# ⭐️ Streaming Send 버튼 개선본
 if st.button("Send (Streaming)"):
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
     if user_input_value != "":
+        # 사용자 메시지 추가
         st.session_state.messages.append({
             "role": "user",
             "content": user_input_value
         })
 
+        # 입력창 초기화
         st.session_state.user_input_key_num += 1
         st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
+
+        # ⭐️ 빈 assistant 메시지 먼저 추가 (실시간 업데이트 반영 목적)
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": ""
+        })
 
         # Streaming call
         with st.spinner("Assistant is streaming..."):
@@ -96,16 +104,15 @@ if st.button("Send (Streaming)"):
                 stream=True
             )
 
-            bot_reply = ""
-            reply_box = st.empty()
+            reply_box = st.empty()  # reply_box 항상 표시용
 
             for line in response.iter_lines(decode_unicode=True):
                 if line:
-                    bot_reply += line
-                    reply_box.markdown(bot_reply)
+                    # session_state에 최신 업데이트 → 기존 채팅에도 바로 반영됨
+                    st.session_state.messages[-1]["content"] += line
+                    reply_box.markdown(st.session_state.messages[-1]["content"])
 
-            st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-
+        # rerun으로 최신 state 반영
         st.rerun()
 
 # Clear Chat 버튼
