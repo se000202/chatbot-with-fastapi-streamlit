@@ -1,4 +1,4 @@
-# ✅ app.py — Streamlit 최종본 (Send → /chat, Streaming → /chat_stream)
+# ✅ app.py — Streamlit 최종 개선본 (Send → /chat, Streaming → /chat_stream, 안정적 Streaming 적용)
 
 import streamlit as st
 import requests
@@ -106,10 +106,10 @@ if st.button("Send (Streaming)"):
                 stream=True
             )
 
-            # iter_content 로 token-level stream
-            for chunk in response.iter_content(chunk_size=1, decode_unicode=True):
-                if chunk:
-                    st.session_state.messages[-1]["content"] += chunk
+            # ⭐️ iter_lines 로 안정적 Streaming 처리
+            for line in response.iter_lines(decode_unicode=True):
+                if line:
+                    st.session_state.messages[-1]["content"] += line
                     reply_box.markdown(st.session_state.messages[-1]["content"])
 
         st.session_state.streaming = False
