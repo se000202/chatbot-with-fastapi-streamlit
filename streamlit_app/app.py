@@ -30,9 +30,10 @@ for i, msg in enumerate(st.session_state.messages):
         st.write(f"🧑‍💻 **You:** {msg['content']}")
     elif msg["role"] == "assistant":
         if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
-            reply_box.markdown(msg["content"])
+            reply_box.markdown(f"🤖 **Bot:** {msg['content']}")
         else:
-            st.markdown(msg["content"])
+            st.markdown(f"🤖 **Bot:** {msg['content']}")
+
 
 # Input
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
