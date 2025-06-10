@@ -112,7 +112,7 @@ if st.button("Send (Streaming)"):
             for line in response.iter_lines(decode_unicode=True):
                 if line:
                 # 줄바꿈과 수식 간 공간 확보
-                    line = line.add("\n", "\n\n")
+                    line = line.append("\n\n")
                     st.session_state.messages[-1]["content"] += line
                     reply_box.markdown(st.session_state.messages[-1]["content"])
 
