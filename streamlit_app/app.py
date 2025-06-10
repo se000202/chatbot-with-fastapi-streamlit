@@ -111,10 +111,10 @@ if st.button("Send (Streaming)"):
             # ⭐️ iter_lines 로 안정적 Streaming 처리
             for line in response.iter_lines(decode_unicode=True):
                 if line:
+                # 줄바꿈과 수식 간 공간 확보
+                    line = line.replace("\n", "\n\n")
                     st.session_state.messages[-1]["content"] += line
-                    #safe_content = st.session_state.messages[-1]["content"].replace('\n', '<br>')
-                    safe_content = st.session_state.messages[-1]["content"]
-                    reply_box.markdown(f"🤖 **Bot:** {safe_content}")
+                    reply_box.markdown(st.session_state.messages[-1]["content"])
 
         st.session_state.streaming = False
         st.rerun()
