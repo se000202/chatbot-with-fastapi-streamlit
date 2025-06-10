@@ -38,12 +38,11 @@ for i, msg in enumerate(st.session_state.messages):
         st.write(f"🧑‍💼 **You:** {msg['content']}")
     elif msg["role"] == "assistant":
         # 줄바꿈 처리
-        #safe_content = msg["content"].replace('\n', '<br>')
-        safe_content = msg["content"]
+        safe_content = msg["content"].replace('\n', '<br>')
         if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
-            reply_box.markdown(f"🤖 **Bot:** {safe_content}")
+            reply_box.markdown(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=True)
         else:
-            st.markdown(f"🤖 **Bot:** {safe_content}")
+            st.markdown(f"🤖 **Bot:** {safe_content}",unsafe_allow_html=True)
 
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
@@ -114,7 +113,7 @@ if st.button("Send (Streaming)"):
                     st.session_state.messages[-1]["content"] += line
                     #safe_content = st.session_state.messages[-1]["content"].replace('\n', '<br>')
                     #safe_content = st.session_state.messages[-1]["content"]
-                    reply_box.markdown(f"🤖 **Bot:** {st.session_state.messages[-1]["content"]}")
+                    reply_box.markdown(f"🤖 **Bot:** {st.session_state.messages[-1]["content"]}", unsafe_allow_html=True)
 
         st.session_state.streaming = False
         st.rerun()
