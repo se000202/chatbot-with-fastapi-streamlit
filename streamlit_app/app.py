@@ -111,7 +111,8 @@ if st.button("Send (Streaming)"):
             for line in response.iter_lines(decode_unicode=True):
                 if line:
                     st.session_state.messages[-1]["content"] += line
-                    safe_content = st.session_state.messages[-1]["content"].replace('\n', '<br>')
+                    #safe_content = st.session_state.messages[-1]["content"].replace('\n', '<br>')
+                    safe_content = st.session_state.messages[-1]["content"]
                     reply_box.markdown(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=True)
 
         st.session_state.streaming = False
