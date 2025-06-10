@@ -40,9 +40,9 @@ for i, msg in enumerate(st.session_state.messages):
         # 줄바꿈 처리
         safe_content = msg["content"].replace('\n', '<br>')
         if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
-            reply_box.latex(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=True)
+            reply_box.latex(f"🤖 **Bot:** {safe_content}")
         else:
-            st.latex(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=True)
+            st.latex(f"🤖 **Bot:** {safe_content}")
 
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
