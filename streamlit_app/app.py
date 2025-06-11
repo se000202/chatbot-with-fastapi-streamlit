@@ -41,9 +41,9 @@ for i, msg in enumerate(st.session_state.messages):
         #safe_content = msg["content"].replace('\n', '<br>')
         safe_content = msg["content"]
         if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
-            reply_box.markdown(f"🤖 **Bot:** {safe_content}")
+            reply_box.markdown(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=False)
         else:
-            st.markdown(f"🤖 **Bot:** {safe_content}")
+            st.markdown(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=False)
 
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
@@ -114,7 +114,7 @@ if st.button("Send (Streaming)"):
                 # 줄바꿈과 수식 간 공간 확보
                     line = line + "\n\n"
                     st.session_state.messages[-1]["content"] += line
-                    reply_box.markdown(st.session_state.messages[-1]["content"])
+                    reply_box.markdown(st.session_state.messages[-1]["content"], unsafe_allow_html=False)
 
         st.session_state.streaming = False
         st.rerun()
