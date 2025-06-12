@@ -48,7 +48,7 @@ for i, msg in enumerate(st.session_state.messages):
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
 
-일반 Send 버튼
+# 일반 Send 버튼
 if st.button("Send"):
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
