@@ -80,43 +80,43 @@ if st.button("Send"):
 
         st.rerun()
 
-# Streaming Send 버튼
-if st.button("Send (Streaming)"):
-    user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
+# # Streaming Send 버튼
+# if st.button("Send (Streaming)"):
+#     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
-    if user_input_value != "":
-        st.session_state.messages.append({
-            "role": "user",
-            "content": user_input_value
-        })
+#     if user_input_value != "":
+#         st.session_state.messages.append({
+#             "role": "user",
+#             "content": user_input_value
+#         })
 
-        st.session_state.user_input_key_num += 1
-        st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
+#         st.session_state.user_input_key_num += 1
+#         st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": ""
-        })
-        st.session_state.streaming = True
+#         st.session_state.messages.append({
+#             "role": "assistant",
+#             "content": ""
+#         })
+#         st.session_state.streaming = True
 
-        with st.spinner("Assistant is streaming..."):
-            response = requests.post(
-                API_URL + "/chat_stream",  # ✅ /chat_stream endpoint 호출
-                json={"messages": st.session_state.messages},
-                stream=True
-            )
+#         with st.spinner("Assistant is streaming..."):
+#             response = requests.post(
+#                 API_URL + "/chat_stream",  # ✅ /chat_stream endpoint 호출
+#                 json={"messages": st.session_state.messages},
+#                 stream=True
+#             )
 
-            # iter_lines 로 안정적 Streaming 처리
-            for line in response.iter_lines(decode_unicode=True):
-                if line:
-                    # 줄바꿈 간격 확보
-                    line = line + "\n\n"
-                    st.session_state.messages[-1]["content"] += line
-                    reply_box.markdown(f"🤖 **Bot:** {st.session_state.messages[-1]['content']}",
-                                       unsafe_allow_html=False)
+#             # iter_lines 로 안정적 Streaming 처리
+#             for line in response.iter_lines(decode_unicode=True):
+#                 if line:
+#                     # 줄바꿈 간격 확보
+#                     line = line + "\n\n"
+#                     st.session_state.messages[-1]["content"] += line
+#                     reply_box.markdown(f"🤖 **Bot:** {st.session_state.messages[-1]['content']}",
+#                                        unsafe_allow_html=False)
 
-        st.session_state.streaming = False
-        st.rerun()
+#         st.session_state.streaming = False
+#         st.rerun()
 
 # Clear Chat 버튼
 if st.button("Clear Chat"):
