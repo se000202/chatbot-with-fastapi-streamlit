@@ -65,8 +65,8 @@ for i, msg in enumerate(st.session_state.messages):
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
 
-# Streaming Send 버튼
-if st.button("Send (Streaming)"):
+# Send 버튼
+if st.button("Send"):
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
     if user_input_value != "":
@@ -84,30 +84,35 @@ if st.button("Send (Streaming)"):
         })
         st.session_state.streaming = True
 
-        with st.spinner("Assistant is streaming..."):
+        with st.spinner("Assistant is responding..."):
             response = requests.post(
-                API_URL + "/chat_stream",  # ✅ /chat_stream endpoint 호출
-                json={"messages": st.session_state.messages},
-                stream=True
+                API_URL + "/chat",  # ✅ /chat endpoint 호출 (stream 제거)
+                json={"messages": st.session_state.messages}
             )
 
-            # ⭐️ iter_lines 로 안정적 Streaming 처리
-            for line in response.iter_lines(decode_unicode=True):
-                if line:
-                    # 줄바꿈과 수식 간 공간 확보
-                    line = line + "\n\n"
-                    st.session_state.messages[-1]["content"] += line
-
-                    # Bot prefix 결정 (반복 표시 위해 다시 판단)
-                    if st.session_state.get("last_is_code", False):
-                        bot_prefix = "🤖 **Bot (code mode):**"
+            if response.status_code == 200:
+                try:
+                    resp_json = response.json()
+                    if "response" in resp_json:
+                        st.session_state.messages[-1]["content"] = resp_json["response"]
                     else:
-                        bot_prefix = "🤖 **Bot:**"
+                        st.session_state.messages[-1]["content"] = f"❌ Invalid response format: {resp_json}"
+                except Exception as e:
+                    st.session_state.messages[-1]["content"] = f"❌ Error parsing JSON: {str(e)}\nResponse text: {response.text}"
+            else:
+                st.session_state.messages[-1]["content"] = f"❌ Error {response.status_code}: {response.text}"
 
-                    reply_box.markdown(f"{bot_prefix} {st.session_state.messages[-1]['content']}", unsafe_allow_html=False)
+            # Bot prefix 결정
+            if st.session_state.get("last_is_code", False):
+                bot_prefix = "🤖 **Bot (code mode):**"
+            else:
+                bot_prefix = "🤖 **Bot:**"
+
+            reply_box.markdown(f"{bot_prefix} {st.session_state.messages[-1]['content']}", unsafe_allow_html=False)
 
         st.session_state.streaming = False
         st.rerun()
+
 
 # Clear Chat 버튼
 if st.button("Clear Chat"):
