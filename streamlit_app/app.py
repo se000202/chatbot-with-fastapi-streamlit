@@ -1,4 +1,4 @@
-# ✅ app.py — Streamlit 최종 개선본 (Send → /chat, Streaming → /chat_stream, 줄바꿈 + 이모지 적용)
+# ✅ app.py — Streamlit 최종본 (Send → /chat, Streaming → /chat_stream + Bot 이모지 + 줄바꿈 처리)
 
 import streamlit as st
 import requests
@@ -27,7 +27,7 @@ if "user_input_key" not in st.session_state:
     st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
 # UI 구성
-st.title("💬 Chatbot with Streaming + Context (FastAPI + GPT)")
+st.title("💬 Chatbot with Streaming + Safe Python + LaTeX")
 
 # reply_box 전역 선언
 reply_box = st.empty()
@@ -37,8 +37,6 @@ for i, msg in enumerate(st.session_state.messages):
     if msg["role"] == "user":
         st.write(f"🧑‍💼 **You:** {msg['content']}")
     elif msg["role"] == "assistant":
-        # 줄바꿈 처리
-        #safe_content = msg["content"].replace('\n', '<br>')
         safe_content = msg["content"]
         if i == len(st.session_state.messages) - 1 and st.session_state.get("streaming", False):
             reply_box.markdown(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=False)
@@ -48,8 +46,8 @@ for i, msg in enumerate(st.session_state.messages):
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
 
-# 일반 Send 버튼
-if st.button("Send"):
+# Streaming Send 버튼 (우선 Streaming만 제공)
+if st.button("Send (Streaming)"):
     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
 
     if user_input_value != "":
@@ -61,63 +59,53 @@ if st.button("Send"):
         st.session_state.user_input_key_num += 1
         st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
 
-        with st.spinner("Assistant is typing..."):
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": ""
+        })
+        st.session_state.streaming = True
+
+        # 코드 요청인지 확인
+        code_keywords = ["파이썬 코드", "python 코드", "Python function", "def compute", "코드 작성", "코드로 해결"]
+
+        target_api = "/chat_stream"
+        for keyword in code_keywords:
+            if keyword in user_input_value:
+                target_api = "/chat"  # 코드 실행은 일반 chat (sync) 사용 (Streaming 불필요)
+                break
+
+        with st.spinner("Assistant is streaming..."):
             response = requests.post(
-                API_URL + "/chat",  # ✅ /chat endpoint 호출
-                json={"messages": st.session_state.messages}
+                API_URL + target_api,
+                json={"messages": st.session_state.messages},
+                stream=(target_api == "/chat_stream")
             )
 
-            if response.status_code == 200:
-                try:
-                    resp_json = response.json()
-                    if "response" in resp_json:
-                        bot_reply = resp_json["response"]
-                        st.session_state.messages.append({"role": "assistant", "content": bot_reply})
-                    else:
-                        st.error(f"❌ Invalid response format: {resp_json}")
-                except Exception as e:
-                    st.error(f"❌ Error parsing JSON: {str(e)}\nResponse text: {response.text}")
+            if target_api == "/chat":
+                # 일반 chat → 결과 한 번에 처리
+                if response.status_code == 200:
+                    try:
+                        resp_json = response.json()
+                        if "response" in resp_json:
+                            bot_reply = resp_json["response"]
+                            st.session_state.messages[-1]["content"] = bot_reply
+                        else:
+                            st.error(f"❌ Invalid response format: {resp_json}")
+                    except Exception as e:
+                        st.error(f"❌ Error parsing JSON: {str(e)}\nResponse text: {response.text}")
+                else:
+                    st.error(f"❌ Error {response.status_code}: {response.text}")
+
             else:
-                st.error(f"❌ Error {response.status_code}: {response.text}")
+                # Streaming chat
+                for line in response.iter_lines(decode_unicode=True):
+                    if line:
+                        line += "\n\n"
+                        st.session_state.messages[-1]["content"] += line
+                        reply_box.markdown(f"🤖 **Bot:** {st.session_state.messages[-1]['content']}", unsafe_allow_html=False)
 
+        st.session_state.streaming = False
         st.rerun()
-
-# # Streaming Send 버튼
-# if st.button("Send (Streaming)"):
-#     user_input_value = st.session_state.get(st.session_state.user_input_key, "").strip()
-
-#     if user_input_value != "":
-#         st.session_state.messages.append({
-#             "role": "user",
-#             "content": user_input_value
-#         })
-
-#         st.session_state.user_input_key_num += 1
-#         st.session_state.user_input_key = f"user_input_{st.session_state.user_input_key_num}"
-
-#         st.session_state.messages.append({
-#             "role": "assistant",
-#             "content": ""
-#         })
-#         st.session_state.streaming = True
-
-#         with st.spinner("Assistant is streaming..."):
-#             response = requests.post(
-#                 API_URL + "/chat_stream",  # ✅ /chat_stream endpoint 호출
-#                 json={"messages": st.session_state.messages},
-#                 stream=True
-#             )
-
-#             # ⭐️ iter_lines 로 안정적 Streaming 처리
-#             for line in response.iter_lines(decode_unicode=True):
-#                 if line:
-#                 # 줄바꿈과 수식 간 공간 확보
-#                     line = line + "\n\n"
-#                     st.session_state.messages[-1]["content"] += line
-#                     reply_box.markdown(st.session_state.messages[-1]["content"], unsafe_allow_html=False)
-
-#         st.session_state.streaming = False
-#         st.rerun()
 
 # Clear Chat 버튼
 if st.button("Clear Chat"):
