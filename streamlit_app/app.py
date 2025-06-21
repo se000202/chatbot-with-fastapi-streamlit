@@ -39,7 +39,7 @@ for i, msg in enumerate(st.session_state.messages):
     elif msg["role"] == "assistant":
         safe_content = msg["content"]
         # st.markdown(f"🤖 **Bot:** {safe_content}", unsafe_allow_html=False)
-        st.code(safe_content)
+        st.markdown(safe_content)
 
 # 사용자 입력
 user_input = st.text_area("Your message:", height=100, key=st.session_state.user_input_key)
